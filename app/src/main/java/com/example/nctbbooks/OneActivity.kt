@@ -1,5 +1,6 @@
 package com.example.nctbbooks
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +16,12 @@ class OneActivity : AppCompatActivity() {
 
         val subjects = listOf("বাংলা", "English", "গণিত")
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = OneAdapter(subjects)
+        recyclerView.adapter = OneAdapter(subjects) { subject ->
+
+            if (subject == "বাংলা") {
+                val intent = Intent(this, PdfViewerActivity::class.java)
+                startActivity(intent)
+            }
+        }
     }
 }

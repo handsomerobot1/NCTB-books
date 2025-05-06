@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+
 }
 
 android {
@@ -36,6 +37,9 @@ android {
 }
 
 dependencies {
+
+    implementation("com.github.mhiew:android-pdf-viewer:3.2.0-beta.1")
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
