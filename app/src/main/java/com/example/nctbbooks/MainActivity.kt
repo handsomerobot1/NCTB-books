@@ -1,20 +1,33 @@
 package com.example.nctbbooks
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+
+        val recyclerView = findViewById<RecyclerView>(R.id.numberRecyclerView)
+
+        val classBooks = listOf(
+            "১ম শ্রেণীর বই",
+            "২য় শ্রেণীর বই",
+            "৩য় শ্রেণীর বই",
+            "৪র্থ শ্রেণীর বই",
+            "৫ম শ্রেণীর বই",
+            "৬ষ্ঠ শ্রেণীর বই",
+            "৭ম শ্রেণীর বই",
+            "৮ম শ্রেণীর বই",
+            "৯ম শ্রেণীর বই",
+            "১০ম শ্রেণীর বই",
+            "একাদশ শ্রেণীর বই",
+            "দ্বাদশ শ্রেণির বই"
+        )
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = NumberAdapter(classBooks)
     }
 }
