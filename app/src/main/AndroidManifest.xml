@@ -17,9 +17,7 @@
 
             android:name=".PdfViewerActivity"
             android:exported="false" />
-        <activity
-            android:name=".OneActivity"
-            android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
