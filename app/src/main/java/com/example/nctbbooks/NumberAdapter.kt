@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 class NumberAdapter(
     private val context: Context,
-    private var items: MutableList<String>
+    private var items: MutableList<String>,
+    private val onItemClick: (Int) -> Unit
 ) : RecyclerView.Adapter<NumberAdapter.NumberViewHolder>() {
 
     class NumberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -26,6 +27,12 @@ class NumberAdapter(
     override fun onBindViewHolder(holder: NumberViewHolder, position: Int) {
         holder.numberText.text = items[position]
 
+        // Handle item click
+        holder.itemView.setOnClickListener {
+            onItemClick(position)
+        }
+
+        // Handle long click for deletion
         holder.itemView.setOnLongClickListener {
             showDeleteConfirmationDialog(position)
             true
