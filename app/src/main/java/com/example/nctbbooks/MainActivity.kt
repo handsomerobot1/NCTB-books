@@ -3,7 +3,7 @@ package com.example.nctbbooks
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
@@ -49,16 +49,38 @@ class MainActivity : AppCompatActivity() {
             val selectedItem = currentBooks[position]
 
             if (showingBooks) {
-                // If already showing books, go back to class list
                 showClassList()
             } else {
-                // Show books for this class
                 adapter.updateItems(listOf("Book 1", "Book 2", "Book 3")) // Replace with actual book list
                 showingBooks = true
                 Toast.makeText(this, "Showing books for $selectedItem", Toast.LENGTH_SHORT).show()
             }
         }
         recyclerView.adapter = adapter
+
+        // Setup drag and swipe
+        // Setup drag and swipe
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val fromPosition = viewHolder.adapterPosition
+                val toPosition = target.adapterPosition
+                adapter.moveItem(fromPosition, toPosition)
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                adapter.deleteItem(position)  // Trigger the delete confirmation dialog
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(recyclerView)
 
         findViewById<androidx.constraintlayout.widget.ConstraintLayout>(R.id.primary).setOnClickListener {
             if (showingBooks) showClassList()
@@ -84,7 +106,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showClassList() {
-        // Reset to class list view
         currentBooks = if (isBangla) primaryBooks else primaryBooksEnglish
         adapter.updateItems(currentBooks)
         showingBooks = false

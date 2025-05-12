@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import java.util.*
 
 class NumberAdapter(
     private val context: Context,
@@ -32,36 +33,19 @@ class NumberAdapter(
             onItemClick(position)
         }
 
-        // Handle long click for deletion
-        holder.itemView.setOnLongClickListener {
-            showDeleteConfirmationDialog(position)
-            true
-        }
-
-        // Slide-in animation
+        // Apply slide-in animation
         holder.itemView.translationX = -holder.itemView.width.toFloat()
+        holder.itemView.alpha = 0f
+        holder.itemView.scaleX = 0.8f
+        holder.itemView.scaleY = 0.8f
         holder.itemView.animate()
             .translationX(0f)
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
             .setDuration(500)
-            .setStartDelay(position * 100L) // Adds a stagger effect
+            .setStartDelay(position * 50L) // Adds a stagger effect
             .start()
-    }
-
-    private fun showDeleteConfirmationDialog(position: Int) {
-        AlertDialog.Builder(context)
-            .setTitle("Delete Item")
-            .setMessage("Are you sure you want to delete this item?")
-            .setPositiveButton("Delete") { dialog, which ->
-                items.removeAt(position)
-                notifyItemRemoved(position)
-                notifyItemRangeChanged(position, items.size)
-                Toast.makeText(context, "Item deleted", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel") { dialog, which ->
-                dialog.dismiss()
-            }
-            .create()
-            .show()
     }
 
     override fun getItemCount(): Int = items.size
@@ -70,4 +54,61 @@ class NumberAdapter(
         items = newItems.toMutableList()
         notifyDataSetChanged()
     }
+
+    fun moveItem(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < items.size && toPosition < items.size) {
+            Collections.swap(items, fromPosition, toPosition)
+            notifyItemMoved(fromPosition, toPosition)
+        }
+    }
+
+    fun deleteItem(position: Int) {
+        if (position < items.size) {
+            val itemToDelete = items[position]  // Store the item temporarily
+
+            // Show a confirmation dialog before deleting the item
+            AlertDialog.Builder(context)
+                .setTitle("Confirm Deletion")
+                .setMessage("Are you sure you want to delete this item?")
+                .setPositiveButton("Yes") { dialog, which ->
+                    // Remove the item from the list
+                    items.removeAt(position)
+
+                    // Notify the adapter to remove the item at the given position
+                    notifyItemRemoved(position)
+                    // Optionally notify the remaining items if you want to update them
+                    // Uncomment below line if required
+                    // notifyItemRangeChanged(position, items.size)
+
+                    // Show a toast to inform the user the item has been deleted
+                    Toast.makeText(context, "$itemToDelete deleted", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancel") { dialog, which ->
+                    // Restore the item to its original position
+                    items.add(position, itemToDelete)  // Insert the item back at the same position
+
+                    // Notify the adapter to show the restored item
+                    notifyItemInserted(position)
+
+                    // Dismiss the dialog without making changes
+                    dialog.dismiss()
+
+                    // Optionally, you can show a toast to inform the user that the item was restored
+                    Toast.makeText(context, "$itemToDelete restored", Toast.LENGTH_SHORT).show()
+                }
+                .show()
+        }
+    }
+
+
+
+
+
+
+    fun restoreItem(item: String, position: Int) {
+        items.add(position, item)
+        notifyItemInserted(position)
+    }
+
+    fun getItem(position: Int): String = items[position]
 }

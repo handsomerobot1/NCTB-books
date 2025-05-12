@@ -13,7 +13,9 @@ class PdfViewerActivity : AppCompatActivity() {
         val pdfView = findViewById<PDFView>(R.id.pdfView)
 
         // Load Bangla book from assets
-        pdfView.fromAsset("bangla.pdf") // Make sure the PDF file is located in 'assets'
+        pdfView.fromAsset("One Bangla B.pdf")
+        pdfView.fromAsset("One Math B.pdf")
+        pdfView.fromAsset("One English B.pdf") // Make sure the PDF file is located in 'assets'
             .enableSwipe(true) // Enable swipe navigation
             .swipeHorizontal(false) // Vertical swipe
             .enableDoubletap(true) // Allow double-tap to zoom
