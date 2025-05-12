@@ -169,4 +169,15 @@ class MainActivity : AppCompatActivity() {
     private fun toggleLanguage() {
         isBangla = !isBangla
     }
+    override fun onBackPressed() {
+        if (showingBooks) {
+            // If currently showing books, go back to the class list
+            showClassList()
+            Toast.makeText(this, "Back to class list", Toast.LENGTH_SHORT).show()
+        } else {
+            // If already at the class list, exit the app
+            super.onBackPressed()
+        }
+    }
 }
+
