@@ -37,6 +37,14 @@ class NumberAdapter(
             showDeleteConfirmationDialog(position)
             true
         }
+
+        // Slide-in animation
+        holder.itemView.translationX = -holder.itemView.width.toFloat()
+        holder.itemView.animate()
+            .translationX(0f)
+            .setDuration(500)
+            .setStartDelay(position * 100L) // Adds a stagger effect
+            .start()
     }
 
     private fun showDeleteConfirmationDialog(position: Int) {
@@ -44,14 +52,12 @@ class NumberAdapter(
             .setTitle("Delete Item")
             .setMessage("Are you sure you want to delete this item?")
             .setPositiveButton("Delete") { dialog, which ->
-                // User confirmed deletion
                 items.removeAt(position)
                 notifyItemRemoved(position)
                 notifyItemRangeChanged(position, items.size)
                 Toast.makeText(context, "Item deleted", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel") { dialog, which ->
-                // User cancelled the deletion
                 dialog.dismiss()
             }
             .create()

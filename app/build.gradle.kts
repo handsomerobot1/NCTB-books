@@ -39,6 +39,7 @@ android {
 dependencies {
 
     implementation("com.github.mhiew:android-pdf-viewer:3.2.0-beta.1")
+    implementation ("jp.wasabeef:recyclerview-animators:4.0.2")
 
 
     implementation(libs.androidx.core.ktx)
