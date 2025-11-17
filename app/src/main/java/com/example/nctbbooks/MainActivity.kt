@@ -1,5 +1,6 @@
 package com.example.nctbbooks
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,16 +25,44 @@ class MainActivity : AppCompatActivity() {
         "Class 11-12 Books"
     )
 
+    // Sample book data structure
+    private val classBooks = mapOf(
+        0 to listOf("বাংলা বই", "গণিত বই", "ইংরেজি বই"), // Class 1 books
+        1 to listOf("বাংলা বই", "গণিত বই", "ইংরেজি বই"), // Class 2 books
+        // Add more classes as needed
+    )
+
+    private val classBooksEnglish = mapOf(
+        0 to listOf("Bangla Book", "Math Book", "English Book"),
+        1 to listOf("Bangla Book", "Math Book", "English Book"),
+        // Add more classes as needed
+    )
+
+    // PDF URLs for each book
+    private val bookPdfUrls = mapOf(
+        // Class 1 books
+        "0_0" to "https://capniqfjwqttsstwotuh.supabase.co/storage/v1/object/public/books/ai.pdf",
+        "0_1" to "https://capniqfjwqttsstwotuh.supabase.co/storage/v1/object/public/books/ai.pdf",
+        "0_2" to "https://capniqfjwqttsstwotuh.supabase.co/storage/v1/object/public/books/ai.pdf",
+
+        // Class 2 books
+        "1_0" to "https://capniqfjwqttsstwotuh.supabase.co/storage/v1/object/public/books/ai.pdf",
+        "1_1" to "https://YOUR-PROJECT.supabase.co/storage/v1/object/public/books/TwoMathB.pdf",
+        "1_2" to "https://YOUR-PROJECT.supabase.co/storage/v1/object/public/books/TwoEnglishB.pdf",
+    )
+
     private var isBangla = true
+    private var currentClassPosition = -1
     private lateinit var currentBooks: MutableList<String>
     private lateinit var adapter: NumberAdapter
+    private lateinit var recyclerView: RecyclerView
     private var showingBooks = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val recyclerView = findViewById<RecyclerView>(R.id.numberRecyclerView)
+        recyclerView = findViewById(R.id.numberRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         // Apply item animator for better animations
@@ -45,20 +74,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         currentBooks = primaryBooks
-        adapter = NumberAdapter(this, currentBooks) { position ->
-            val selectedItem = currentBooks[position]
-
-            if (showingBooks) {
-                showClassList()
-            } else {
-                adapter.updateItems(listOf("Book 1", "Book 2", "Book 3")) // Replace with actual book list
-                showingBooks = true
-                Toast.makeText(this, "Showing books for $selectedItem", Toast.LENGTH_SHORT).show()
-            }
-        }
+        setupAdapter()
         recyclerView.adapter = adapter
 
-        // Setup drag and swipe
         // Setup drag and swipe
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
@@ -77,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
-                adapter.deleteItem(position)  // Trigger the delete confirmation dialog
+                adapter.deleteItem(position)
             }
         })
         itemTouchHelper.attachToRecyclerView(recyclerView)
@@ -105,14 +123,68 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupAdapter() {
+        adapter = NumberAdapter(this, currentBooks) { position ->
+            if (showingBooks) {
+                // Book item clicked - open PDF
+                openPdf(currentClassPosition, position)
+            } else {
+                // Class item clicked - show books
+                showBooksForClass(position)
+            }
+        }
+    }
+
+    private fun showBooksForClass(classPosition: Int) {
+        currentClassPosition = classPosition
+        val books = if (isBangla) {
+            classBooks[classPosition] ?: listOf("বাংলা বই", "গণিত বই", "ইংরেজি বই")
+        } else {
+            classBooksEnglish[classPosition] ?: listOf("Bangla Book", "Math Book", "English Book")
+        }
+
+        adapter.updateItems(books.toMutableList())
+        showingBooks = true
+
+        val className = if (isBangla) primaryBooks[classPosition] else primaryBooksEnglish[classPosition]
+        Toast.makeText(this, "Showing books for $className", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun openPdf(classPosition: Int, bookPosition: Int) {
+        val pdfKey = "${classPosition}_${bookPosition}"
+        val pdfUrl = bookPdfUrls[pdfKey] ?: ""
+
+        if (pdfUrl.isNotEmpty()) {
+            val intent = Intent(this, PdfViewerActivity::class.java)
+            intent.putExtra("pdfUrl", pdfUrl)
+
+            // Get book name for title
+            val bookName = if (isBangla) {
+                classBooks[classPosition]?.get(bookPosition) ?: "Book"
+            } else {
+                classBooksEnglish[classPosition]?.get(bookPosition) ?: "Book"
+            }
+            intent.putExtra("bookName", bookName)
+
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "PDF not available", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun showClassList() {
         currentBooks = if (isBangla) primaryBooks else primaryBooksEnglish
         adapter.updateItems(currentBooks)
         showingBooks = false
+        currentClassPosition = -1
     }
 
     private fun toggleLanguage() {
         isBangla = !isBangla
+        // If we're showing books, update the book list in current language
+        if (showingBooks && currentClassPosition != -1) {
+            showBooksForClass(currentClassPosition)
+        }
     }
 
     override fun onBackPressed() {
